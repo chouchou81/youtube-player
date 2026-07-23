@@ -7,8 +7,10 @@
     const volume = document.querySelector("#volume");
     const volumeValue = document.querySelector("#volumeValue");
     const favoritesList = document.querySelector("#favoritesList");
+    const playToggleButton = document.querySelector("#playToggleButton");
     let player = null;
     let playerReady = false;
+    let isPlaying = false;
 
     function applyVolume() {
         const level = Math.max(0, Math.min(100, Number(volume.value) || 0));
@@ -27,6 +29,12 @@
 
     function play(event) {
         event.preventDefault();
+
+        if (isPlaying) {
+            stop();
+            return;
+        }
+
         const id = api.videoId(input.value);
 
         if (!id) {
@@ -44,11 +52,20 @@
         player.loadVideoById(id);
         applyVolume();
         player.playVideo();
+        setPlayingState(true);
         status.textContent = "재생을 시작합니다.";
+    }
+
+    function setPlayingState(playing) {
+        isPlaying = playing;
+        playToggleButton.textContent = playing ? "정지" : "재생";
+        playToggleButton.classList.toggle("is-playing", playing);
+        playToggleButton.setAttribute("aria-label", playing ? "재생 정지" : "영상 재생");
     }
 
     function stop() {
         player?.stopVideo();
+        setPlayingState(false);
         status.textContent = "재생이 정지되었습니다.";
     }
 
@@ -154,15 +171,19 @@
                 },
                 onStateChange(event) {
                     if (event.data === YT.PlayerState.PLAYING) {
+                        setPlayingState(true);
                         applyVolume();
                         status.textContent = `재생 중 · 볼륨 ${volume.value}%`;
                     } else if (event.data === YT.PlayerState.PAUSED) {
+                        setPlayingState(false);
                         status.textContent = "일시정지됨";
                     } else if (event.data === YT.PlayerState.ENDED) {
+                        setPlayingState(false);
                         status.textContent = "재생이 끝났습니다.";
                     }
                 },
                 onError(event) {
+                    setPlayingState(false);
                     status.textContent = api.errorMessage(event.data);
                 }
             }
@@ -182,7 +203,6 @@
 
     restoreSettings();
     document.querySelector("#playerForm").addEventListener("submit", play);
-    document.querySelector("#stopButton").addEventListener("click", stop);
     document.querySelector("#favoriteAddButton").addEventListener("click", addFavorite);
     favoritesList.addEventListener("click", handleFavoriteClick);
     volume.addEventListener("input", changeVolume);

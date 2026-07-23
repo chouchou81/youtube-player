@@ -10,12 +10,11 @@
 </head>
 <body>
     <form id="playerForm">
-        <label class="sr-only" for="youtubeUrl">유튜브 영상 주소</label>
-        <input id="youtubeUrl" type="url" inputmode="url" autocomplete="off"
-            placeholder="YouTube 주소를 입력하세요" required>
-        <div class="actions">
-            <button class="play" type="submit">재생</button>
-            <button class="stop" id="stopButton" type="button">정지</button>
+        <div class="url-row">
+            <label class="sr-only" for="youtubeUrl">유튜브 영상 주소</label>
+            <input id="youtubeUrl" type="url" inputmode="url" autocomplete="off"
+                placeholder="YouTube 주소를 입력하세요">
+            <button class="play-toggle" id="playToggleButton" type="submit">재생</button>
         </div>
         <label class="volume-control" for="volume">
             <span class="volume-label">음량 <output id="volumeValue">100%</output></span>
