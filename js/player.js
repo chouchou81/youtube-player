@@ -8,9 +8,11 @@
     const volumeValue = document.querySelector("#volumeValue");
     const favoritesList = document.querySelector("#favoritesList");
     const playToggleButton = document.querySelector("#playToggleButton");
+    const restartButton = document.querySelector("#restartButton");
     let player = null;
     let playerReady = false;
     let isPlaying = false;
+    let loadedVideoId = "";
 
     function applyVolume() {
         const level = Math.max(0, Math.min(100, Number(volume.value) || 0));
@@ -29,17 +31,16 @@
 
     function play(event) {
         event.preventDefault();
-
-        if (isPlaying) {
-            stop();
-            return;
-        }
-
         const id = api.videoId(input.value);
 
         if (!id) {
             status.textContent = "올바른 YouTube 영상 주소를 입력하세요.";
             input.focus();
+            return;
+        }
+
+        if (isPlaying && loadedVideoId === id) {
+            pause();
             return;
         }
 
@@ -49,26 +50,47 @@
         }
 
         localStorage.setItem("youtube-player-url", input.value.trim());
-        player.loadVideoById(id);
+        const isSameVideo = loadedVideoId === id;
+        if (isSameVideo) {
+            player.playVideo();
+        } else {
+            loadedVideoId = id;
+            player.loadVideoById(id);
+        }
         applyVolume();
-        player.playVideo();
         setPlayingState(true);
-        status.textContent = "재생을 시작합니다.";
+        status.textContent = isSameVideo ? "이어서 재생합니다." : "영상을 불러오는 중…";
     }
 
     function setPlayingState(playing) {
         isPlaying = playing;
-        const actionLabel = playing ? "재생 정지" : "영상 재생";
-        playToggleButton.textContent = playing ? "■" : "▶";
+        const actionLabel = playing ? "일시정지" : "영상 재생";
+        playToggleButton.textContent = playing ? "Ⅱ" : "▶";
         playToggleButton.classList.toggle("is-playing", playing);
         playToggleButton.setAttribute("aria-label", actionLabel);
         playToggleButton.title = actionLabel;
     }
 
-    function stop() {
-        player?.stopVideo();
+    function pause() {
+        player?.pauseVideo();
         setPlayingState(false);
-        status.textContent = "재생이 정지되었습니다.";
+        status.textContent = "일시정지되었습니다. 다시 재생하면 이어집니다.";
+    }
+
+    function restart() {
+        if (!playerReady || !player || !loadedVideoId) {
+            status.textContent = "먼저 영상을 재생하세요.";
+            return;
+        }
+
+        player.seekTo(0, true);
+        if (isPlaying) {
+            player.playVideo();
+            status.textContent = "처음부터 다시 재생합니다.";
+        } else {
+            player.pauseVideo();
+            status.textContent = "처음 위치로 이동했습니다.";
+        }
     }
 
     function requestFavoriteChange(type, favorite) {
@@ -205,6 +227,7 @@
 
     restoreSettings();
     document.querySelector("#playerForm").addEventListener("submit", play);
+    restartButton.addEventListener("click", restart);
     document.querySelector("#favoriteAddButton").addEventListener("click", addFavorite);
     favoritesList.addEventListener("click", handleFavoriteClick);
     volume.addEventListener("input", changeVolume);
