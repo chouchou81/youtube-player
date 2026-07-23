@@ -71,12 +71,14 @@ button {
 }
 
 .play-toggle {
-    min-width: 58px;
-    padding: 0 12px;
+    width: 44px;
+    min-width: 44px;
+    padding: 0;
     color: #fff;
     background: #6e5bf6;
     border: 1px solid #6e5bf6;
-    font-size: 0.82rem;
+    font-size: 1rem;
+    line-height: 1;
 }
 
 .play-toggle.is-playing {

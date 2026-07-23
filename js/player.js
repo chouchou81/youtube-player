@@ -58,9 +58,11 @@
 
     function setPlayingState(playing) {
         isPlaying = playing;
-        playToggleButton.textContent = playing ? "정지" : "재생";
+        const actionLabel = playing ? "재생 정지" : "영상 재생";
+        playToggleButton.textContent = playing ? "■" : "▶";
         playToggleButton.classList.toggle("is-playing", playing);
-        playToggleButton.setAttribute("aria-label", playing ? "재생 정지" : "영상 재생");
+        playToggleButton.setAttribute("aria-label", actionLabel);
+        playToggleButton.title = actionLabel;
     }
 
     function stop() {
