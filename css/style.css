@@ -1,0 +1,120 @@
+:root {
+    color-scheme: light dark;
+    font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    background: transparent;
+}
+
+body {
+    padding: 2px;
+    color: light-dark(#172033, #f4f7ff);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+form {
+    display: grid;
+    gap: 12px;
+}
+
+input[type="url"] {
+    width: 100%;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 14px;
+    color: inherit;
+    background: light-dark(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.08));
+    border: 1px solid light-dark(rgba(23, 32, 51, 0.15), rgba(255, 255, 255, 0.15));
+    border-radius: 12px;
+    outline: none;
+    font: inherit;
+}
+
+input[type="url"]:focus {
+    border-color: #6e5bf6;
+    box-shadow: 0 0 0 3px rgba(110, 91, 246, 0.16);
+}
+
+.actions {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+}
+
+button {
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 11px;
+    font: inherit;
+    font-weight: 750;
+    cursor: pointer;
+}
+
+.play {
+    color: #fff;
+    background: #6e5bf6;
+    border: 1px solid #6e5bf6;
+}
+
+.stop {
+    color: inherit;
+    background: light-dark(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.08));
+    border: 1px solid light-dark(rgba(23, 32, 51, 0.15), rgba(255, 255, 255, 0.15));
+}
+
+.volume-control {
+    display: grid;
+    grid-template-columns: auto minmax(80px, 1fr);
+    align-items: center;
+    gap: 12px;
+    color: light-dark(#667085, #aab3c5);
+    font-size: 0.86rem;
+}
+
+.volume-label {
+    min-width: 78px;
+    white-space: nowrap;
+}
+
+input[type="range"] {
+    width: 100%;
+    margin: 0;
+    accent-color: #6e5bf6;
+    cursor: pointer;
+}
+
+.status {
+    min-height: 1.4em;
+    margin: 10px 2px 0;
+    color: light-dark(#667085, #aab3c5);
+    font-size: 0.86rem;
+}
+
+#youtubePlayer {
+    position: fixed;
+    left: -10000px;
+    top: 0;
+    width: 200px;
+    height: 200px;
+    border: 0;
+}
