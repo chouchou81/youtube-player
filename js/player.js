@@ -3,7 +3,6 @@
 
     const api = window.YouTubePlayerApi;
     const input = document.querySelector("#youtubeUrl");
-    const favoriteName = document.querySelector("#favoriteName");
     const status = document.querySelector("#status");
     const volume = document.querySelector("#volume");
     const volumeValue = document.querySelector("#volumeValue");
@@ -64,15 +63,21 @@
 
     function addFavorite() {
         const url = input.value.trim();
-        const name = favoriteName.value.trim();
         if (!api.videoId(url)) {
             status.textContent = "먼저 올바른 YouTube 주소를 입력하세요.";
             input.focus();
             return;
         }
+
+        const enteredName = window.prompt("즐겨찾기명을 입력하세요.");
+        if (enteredName === null) {
+            status.textContent = "즐겨찾기 추가를 취소했습니다.";
+            return;
+        }
+
+        const name = enteredName.trim();
         if (!name) {
-            status.textContent = "즐겨찾기명을 입력하세요.";
-            favoriteName.focus();
+            status.textContent = "즐겨찾기명이 비어 있어 추가하지 않았습니다.";
             return;
         }
         requestFavoriteChange("youtube-favorites:add", { name, url });
@@ -98,7 +103,7 @@
             const id = api.videoId(url) || "YouTube";
             const name = String(favorite?.name || "").trim() || id;
             return `<div class="favorite-item">
-                <button class="favorite-play" type="button" data-favorite-play="${escapeHtml(url)}" data-favorite-name="${escapeHtml(name)}">${escapeHtml(name)}</button>
+                <button class="favorite-play" type="button" data-favorite-play="${escapeHtml(url)}">${escapeHtml(name)}</button>
                 <button class="favorite-remove" type="button" data-favorite-remove="${escapeHtml(url)}" aria-label="${escapeHtml(name)} 삭제">×</button>
             </div>`;
         }).join("");
@@ -108,7 +113,6 @@
         const playButton = event.target.closest("[data-favorite-play]");
         if (playButton) {
             input.value = playButton.dataset.favoritePlay;
-            favoriteName.value = playButton.dataset.favoriteName || "";
             document.querySelector("#playerForm").requestSubmit();
             return;
         }
