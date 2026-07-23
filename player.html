@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ko">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YouTube Player</title>
+    <style>
+        :root {
+            color-scheme: light dark;
+            font-family: Inter, Pretendard, "Noto Sans KR", system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            min-width: 0;
+            margin: 0;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        body {
+            padding: 2px;
+            color: light-dark(#172033, #f4f7ff);
+        }
+
+        form {
+            display: grid;
+            gap: 12px;
+        }
+
+        input {
+            width: 100%;
+            min-width: 0;
+            min-height: 44px;
+            padding: 0 14px;
+            color: inherit;
+            background: light-dark(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.08));
+            border: 1px solid light-dark(rgba(23, 32, 51, 0.15), rgba(255, 255, 255, 0.15));
+            border-radius: 12px;
+            outline: none;
+            font: inherit;
+        }
+
+        input:focus {
+            border-color: #6e5bf6;
+            box-shadow: 0 0 0 3px rgba(110, 91, 246, 0.16);
+        }
+
+        .actions {
+            display: grid;
+            grid-template-columns: 1fr auto;
+            gap: 10px;
+        }
+
+        button {
+            min-height: 42px;
+            padding: 0 18px;
+            border-radius: 11px;
+            font: inherit;
+            font-weight: 750;
+            cursor: pointer;
+        }
+
+        .play {
+            color: #fff;
+            background: #6e5bf6;
+            border: 1px solid #6e5bf6;
+        }
+
+        .stop {
+            color: inherit;
+            background: light-dark(rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.08));
+            border: 1px solid light-dark(rgba(23, 32, 51, 0.15), rgba(255, 255, 255, 0.15));
+        }
+
+        .status {
+            min-height: 1.4em;
+            margin: 10px 2px 0;
+            color: light-dark(#667085, #aab3c5);
+            font-size: 0.86rem;
+        }
+
+        #youtubePlayer {
+            position: fixed;
+            left: -10000px;
+            top: 0;
+            width: 200px;
+            height: 200px;
+            border: 0;
+        }
+    </style>
+</head>
+<body>
+    <form id="playerForm">
+        <label for="youtubeUrl" hidden>유튜브 영상 주소</label>
+        <input id="youtubeUrl" type="url" inputmode="url" autocomplete="off"
+            placeholder="YouTube 주소를 입력하세요" required>
+        <div class="actions">
+            <button class="play" type="submit">재생</button>
+            <button class="stop" id="stopButton" type="button">정지</button>
+        </div>
+    </form>
+    <p class="status" id="status" aria-live="polite">플레이어 준비 중…</p>
+    <div id="youtubePlayer" aria-hidden="true"></div>
+
+    <script>
+        (() => {
+            "use strict";
+
+            let player = null;
+            let playerReady = false;
+            const input = document.querySelector("#youtubeUrl");
+            const status = document.querySelector("#status");
+
+            function videoId(value) {
+                try {
+                    const url = new URL(String(value || "").trim());
+                    const hostname = url.hostname.replace(/^www\./, "").toLowerCase();
+                    let id = "";
+
+                    if (hostname === "youtu.be") {
+                        id = url.pathname.split("/").filter(Boolean)[0] || "";
+                    } else if (hostname === "youtube.com" || hostname.endsWith(".youtube.com")) {
+                        if (url.pathname === "/watch") {
+                            id = url.searchParams.get("v") || "";
+                        } else {
+                            const parts = url.pathname.split("/").filter(Boolean);
+                            if (["shorts", "embed", "live"].includes(parts[0])) {
+                                id = parts[1] || "";
+                            }
+                        }
+                    }
+
+                    return /^[A-Za-z0-9_-]{11}$/.test(id) ? id : "";
+                } catch {
+                    return "";
+                }
+            }
+
+            function play(event) {
+                event.preventDefault();
+                const id = videoId(input.value);
+
+                if (!id) {
+                    status.textContent = "올바른 YouTube 영상 주소를 입력하세요.";
+                    input.focus();
+                    return;
+                }
+
+                if (!playerReady || !player) {
+                    status.textContent = "플레이어를 준비 중입니다. 잠시 후 다시 눌러주세요.";
+                    return;
+                }
+
+                localStorage.setItem("youtube-player-url", input.value.trim());
+                player.loadVideoById(id);
+                player.unMute();
+                player.setVolume(100);
+                player.playVideo();
+                status.textContent = "재생을 시작합니다.";
+            }
+
+            function stop() {
+                player?.stopVideo();
+                status.textContent = "재생이 정지되었습니다.";
+            }
+
+            window.onYouTubeIframeAPIReady = () => {
+                player = new window.YT.Player("youtubePlayer", {
+                    width: "200",
+                    height: "200",
+                    playerVars: {
+                        autoplay: 0,
+                        controls: 0,
+                        playsinline: 1,
+                        origin: location.origin
+                    },
+                    events: {
+                        onReady() {
+                            playerReady = true;
+                            status.textContent = "재생할 주소를 입력하세요.";
+                        },
+                        onStateChange(event) {
+                            if (event.data === window.YT.PlayerState.PLAYING) {
+                                player.unMute();
+                                player.setVolume(100);
+                                status.textContent = "재생 중 · 볼륨 100%";
+                            } else if (event.data === window.YT.PlayerState.PAUSED) {
+                                status.textContent = "일시정지됨";
+                            } else if (event.data === window.YT.PlayerState.ENDED) {
+                                status.textContent = "재생이 끝났습니다.";
+                            }
+                        },
+                        onError(event) {
+                            const messages = {
+                                2: "영상 주소가 올바르지 않습니다. (오류 2)",
+                                5: "브라우저에서 이 영상을 재생할 수 없습니다. (오류 5)",
+                                100: "삭제되었거나 비공개 영상입니다. (오류 100)",
+                                101: "업로더가 외부 재생을 허용하지 않았습니다. (오류 101)",
+                                150: "업로더가 외부 재생을 허용하지 않았습니다. (오류 150)",
+                                153: "GitHub Pages 주소로 접속했는지 확인하세요. (오류 153)"
+                            };
+                            status.textContent = messages[event.data]
+                                || `YouTube 플레이어 오류가 발생했습니다. (오류 ${event.data})`;
+                        }
+                    }
+                });
+            };
+
+            input.value = localStorage.getItem("youtube-player-url") || "";
+            document.querySelector("#playerForm").addEventListener("submit", play);
+            document.querySelector("#stopButton").addEventListener("click", stop);
+        })();
+    </script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+</body>
+</html>
