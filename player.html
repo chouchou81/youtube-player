@@ -14,10 +14,12 @@
             <label class="sr-only" for="youtubeUrl">유튜브 영상 주소</label>
             <input id="youtubeUrl" type="url" inputmode="url" autocomplete="off"
                 placeholder="YouTube 주소를 입력하세요">
-            <button class="play-toggle" id="playToggleButton" type="submit"
-                aria-label="영상 재생" title="영상 재생">▶</button>
-            <button class="restart" id="restartButton" type="button"
-                aria-label="처음부터 재생" title="처음부터">↺</button>
+            <div class="player-buttons">
+                <button class="play-toggle" id="playToggleButton" type="submit"
+                    aria-label="영상 재생" title="영상 재생">▶</button>
+                <button class="restart" id="restartButton" type="button"
+                    aria-label="처음부터 재생" title="처음부터">↺</button>
+            </div>
         </div>
         <label class="volume-control" for="volume">
             <span class="volume-label">음량 <output id="volumeValue">100%</output></span>

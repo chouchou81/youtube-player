@@ -39,8 +39,14 @@ form {
 
 .url-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(140px, 190px) auto;
+    justify-content: start;
     gap: 8px;
+}
+
+.player-buttons {
+    display: flex;
+    gap: 5px;
 }
 
 input[type="url"] {
