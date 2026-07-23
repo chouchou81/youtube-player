@@ -37,6 +37,7 @@ form {
     gap: 12px;
 }
 
+input[type="text"],
 input[type="url"] {
     width: 100%;
     min-width: 0;
@@ -50,6 +51,7 @@ input[type="url"] {
     font: inherit;
 }
 
+input[type="text"]:focus,
 input[type="url"]:focus {
     border-color: #6e5bf6;
     box-shadow: 0 0 0 3px rgba(110, 91, 246, 0.16);
@@ -130,7 +132,7 @@ input[type="range"] {
 .favorites-list {
     display: grid;
     gap: 6px;
-    max-height: 92px;
+    max-height: 112px;
     overflow-y: auto;
 }
 

@@ -3,6 +3,7 @@
 
     const api = window.YouTubePlayerApi;
     const input = document.querySelector("#youtubeUrl");
+    const favoriteName = document.querySelector("#favoriteName");
     const status = document.querySelector("#status");
     const volume = document.querySelector("#volume");
     const volumeValue = document.querySelector("#volumeValue");
@@ -52,23 +53,38 @@
         status.textContent = "재생이 정지되었습니다.";
     }
 
-    function requestFavoriteChange(type, url) {
+    function requestFavoriteChange(type, favorite) {
         if (window.parent === window) {
             status.textContent = "즐겨찾기 수정은 home.html에서 실행할 때 사용할 수 있습니다.";
             return;
         }
-        window.parent.postMessage({ type, url }, "*");
+        window.parent.postMessage({ type, ...favorite }, "*");
         status.textContent = "GitHub에 저장 중…";
     }
 
     function addFavorite() {
         const url = input.value.trim();
+        const name = favoriteName.value.trim();
         if (!api.videoId(url)) {
             status.textContent = "먼저 올바른 YouTube 주소를 입력하세요.";
             input.focus();
             return;
         }
-        requestFavoriteChange("youtube-favorites:add", url);
+        if (!name) {
+            status.textContent = "즐겨찾기명을 입력하세요.";
+            favoriteName.focus();
+            return;
+        }
+        requestFavoriteChange("youtube-favorites:add", { name, url });
+    }
+
+    function escapeHtml(value) {
+        return String(value || "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
     function renderFavorites(favorites) {
@@ -80,9 +96,10 @@
         favoritesList.innerHTML = favorites.map((favorite) => {
             const url = String(favorite?.url || "");
             const id = api.videoId(url) || "YouTube";
+            const name = String(favorite?.name || "").trim() || id;
             return `<div class="favorite-item">
-                <button class="favorite-play" type="button" data-favorite-play="${url.replaceAll("&", "&amp;").replaceAll('"', "&quot;")}">${id}</button>
-                <button class="favorite-remove" type="button" data-favorite-remove="${url.replaceAll("&", "&amp;").replaceAll('"', "&quot;")}" aria-label="${id} 삭제">×</button>
+                <button class="favorite-play" type="button" data-favorite-play="${escapeHtml(url)}" data-favorite-name="${escapeHtml(name)}">${escapeHtml(name)}</button>
+                <button class="favorite-remove" type="button" data-favorite-remove="${escapeHtml(url)}" aria-label="${escapeHtml(name)} 삭제">×</button>
             </div>`;
         }).join("");
     }
@@ -91,13 +108,16 @@
         const playButton = event.target.closest("[data-favorite-play]");
         if (playButton) {
             input.value = playButton.dataset.favoritePlay;
+            favoriteName.value = playButton.dataset.favoriteName || "";
             document.querySelector("#playerForm").requestSubmit();
             return;
         }
 
         const removeButton = event.target.closest("[data-favorite-remove]");
         if (removeButton) {
-            requestFavoriteChange("youtube-favorites:remove", removeButton.dataset.favoriteRemove);
+            requestFavoriteChange("youtube-favorites:remove", {
+                url: removeButton.dataset.favoriteRemove
+            });
         }
     }
 
