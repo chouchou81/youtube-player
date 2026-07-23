@@ -22,6 +22,15 @@
             <input id="volume" type="range" min="0" max="100" step="1" value="100">
         </label>
     </form>
+    <section class="favorites" aria-labelledby="favoritesTitle">
+        <div class="favorites-heading">
+            <strong id="favoritesTitle">즐겨찾기</strong>
+            <button class="favorite-add" id="favoriteAddButton" type="button">현재 주소 추가</button>
+        </div>
+        <div class="favorites-list" id="favoritesList">
+            <p class="favorites-empty">즐겨찾기를 불러오는 중…</p>
+        </div>
+    </section>
     <p class="status" id="status" aria-live="polite">플레이어 준비 중…</p>
     <div id="youtubePlayer" aria-hidden="true"></div>
 </body>
