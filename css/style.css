@@ -39,8 +39,7 @@ form {
 
 .url-row {
     display: grid;
-    grid-template-columns: minmax(140px, 190px) auto;
-    justify-content: start;
+    grid-template-columns: minmax(0, 1fr) auto;
     gap: 8px;
 }
 
